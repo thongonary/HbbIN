@@ -9,10 +9,6 @@ from tensorflow.keras import layers, models
 import numpy as np
 
 class InteractionLayer(layers.Layer):
-    '''
-    A custom layer to be plugged in to the full model
-    '''
-
     def __init__(self, n_constituents, n_targets, params, hidden, n_vertices, params_v, vv_branch=False, De=5, Do=6):
         super(InteractionLayer, self).__init__()
         self.hidden = int(hidden)
