@@ -10,12 +10,7 @@ import numpy as np
 
 class InteractionLayer(layers.Layer):
     '''
-    Need a final MLP layer for classification
-            ### Classification MLP ###
-            if self.vv_branch:
-                N =self.fc_fixed(tf.concat([N, N_v], 1))
-            else:
-                N = self.fc_fixed(N)
+    A custom layer to be plugged in to the full model
     '''
 
     def __init__(self, n_constituents, n_targets, params, hidden, n_vertices, params_v, vv_branch=False, De=5, Do=6):

@@ -34,7 +34,7 @@ Determine the parameters needed for the IN. For example:
   - Do = 24
   - Hidden = 60
 
-Would be run by doing:
+Would be run as:
 
 ```bash
 python3 training.py IN_training 0 --De 20 --Do 24 --hidden 60 

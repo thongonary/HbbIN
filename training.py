@@ -26,10 +26,6 @@ elif os.path.isdir('/eos/user/w/woodson/IN'):
     test_path = '/eos/user/w/woodson/IN/convert_20181121_ak8_80x_deepDoubleB_db_pf_cpf_sv_dl4jets_test/'
     train_path = '/eos/user/w/woodson/IN/convert_20181121_ak8_80x_deepDoubleB_db_pf_cpf_sv_dl4jets_train_val/'
 
-NBINS = 40 # number of bins for loss function
-MMAX = 200. # max value
-MMIN = 40. # min value
-
 N = 60 # number of charged particles
 N_sv = 5 # number of SVs 
 n_targets = 2 # number of classes
@@ -128,7 +124,7 @@ def main(args):
         def __init__(self, n_targets, *net_args, **net_kwargs):
             super(HbbIN, self).__init__()
             self.interaction_layer = InteractionLayer(*net_args, **net_kwargs)
-            self.mlp = layers.Dense(n_targets) 
+            self.mlp = layers.Dense(n_targets)
         
         def call(self, input_particles, input_sv):
             post_interact = self.interaction_layer(input_particles, input_sv)
@@ -139,7 +135,7 @@ def main(args):
 
     #### Start training ####
     
-    n_epochs = 5
+    n_epochs = 1
     # Keep results for plotting
     train_loss_results = []
     train_accuracy_results = []
@@ -233,6 +229,11 @@ def main(args):
         val_epoch_loss_avg.reset_states()
         epoch_accuracy.reset_states()
         val_epoch_accuracy.reset_states()
+
+    # Save the model after training
+    save_path = 'models/1/'
+    pathlib.Path(save_path).mkdir(parents=True, exist_ok=True)  
+    tf.saved_model.save(gnn, save_path)
 
 if __name__ == "__main__":
     """ This is executed when run from the command line """
