@@ -2,9 +2,10 @@ Interaction networks for the identification of boosted Higgs to bb decays
 ======================================================================================
 
 This is the Tensorflow 2.0 implementation of the model in this paper 
+
 E. Moreno et al., Interaction networks for the identification of boosted Higgs to bb decays, [arXiv:1909.12285](https://arxiv.org/abs/1909.12285) [hep-ex]
 
-For the PyTorch implementation as well as plots making functionality, please refer to https://github.com/eric-moreno/IN
+For the original PyTorch implementation as well as plots making functionality, please refer to https://github.com/eric-moreno/IN
 
 Requirements
 ======================================================================================
