@@ -10,11 +10,15 @@ Requirements
 ======================================================================================
 ```
 python 3.6
-gpustat 0.6.0
 h5py 2.9.0
 numpy 1.16.4
-setGPU 0.0.7
 tensorflow-gpu 2.0.0
+```
+
+Optional:
+```
+setGPU 0.0.7
+gpustat 0.6.0
 ```
 
 Training
