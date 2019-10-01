@@ -88,14 +88,14 @@ def main(args):
     from data import H5Data
     files = glob.glob(train_path + "/newdata_*.h5")
     files_val = files[:5] # take first 5 for validation
-    files_train = files[5:10] # take rest for training
+    files_train = files[5:] # take rest for training
     
     label = 'new'
     outdir = args.outdir
     vv_branch = args.vv_branch
     pathlib.Path(outdir).mkdir(parents=True, exist_ok=True)  
 
-    batch_size = 128
+    batch_size = 256
     data_train = H5Data(batch_size = batch_size,
                         cache = None,
                         preloading=0,
@@ -135,7 +135,7 @@ def main(args):
 
     #### Start training ####
     
-    n_epochs = 1
+    n_epochs = 100
     # Keep results for plotting
     train_loss_results = []
     train_accuracy_results = []
