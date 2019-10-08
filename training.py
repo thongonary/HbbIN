@@ -16,7 +16,7 @@ import argparse
 import pathlib
 import tensorflow as tf
 from tensorflow.keras import layers, models
-from interaction import InteractionLayer
+from interaction import InteractionModel
 
 os.environ['HDF5_USE_FILE_LOCKING'] = 'FALSE'
 if os.path.isdir('/bigdata/shared/BumbleB'):
@@ -119,23 +119,12 @@ def main(args):
 
     net_args = (N, n_targets, len(params), args.hidden, N_sv, len(params_sv))
     net_kwargs = {"vv_branch": int(vv_branch), "De": args.De, "Do": args.Do}
-
-    class HbbIN(tf.keras.Model):
-        def __init__(self, n_targets, *net_args, **net_kwargs):
-            super(HbbIN, self).__init__()
-            self.interaction_layer = InteractionLayer(*net_args, **net_kwargs)
-            self.mlp = layers.Dense(n_targets)
-        
-        def call(self, input_particles, input_sv):
-            post_interact = self.interaction_layer(input_particles, input_sv)
-            output = self.mlp(post_interact)
-            return output
-            
-    gnn = HbbIN(n_targets, *net_args, **net_kwargs)
-
+    
+    gnn = InteractionModel(*net_args, **net_kwargs)
+    
     #### Start training ####
     
-    n_epochs = 100
+    n_epochs = 5
     # Keep results for plotting
     train_loss_results = []
     train_accuracy_results = []
@@ -161,7 +150,7 @@ def main(args):
         val_epoch_accuracy = tf.keras.metrics.CategoricalAccuracy('test_accuracy')
 
         # Training
-        for sub_X,sub_Y,sub_Z in tqdm.tqdm(data_train.generate_data(),total=n_train/batch_size):
+        for sub_X,sub_Y,sub_Z in tqdm.tqdm(data_train.generate_data(),total= 5): # n_train/batch_size):
             training = sub_X[2]
             training_sv = sub_X[3]
             target = sub_Y[0]
@@ -191,7 +180,7 @@ def main(args):
             epoch_accuracy(target, tf.nn.softmax(gnn(training, training_sv)))
 
         # Validation
-        for sub_X,sub_Y,sub_Z in tqdm.tqdm(data_val.generate_data(),total=n_val/batch_size):
+        for sub_X,sub_Y,sub_Z in tqdm.tqdm(data_val.generate_data(),total= 2): #n_val/batch_size):
             training = sub_X[2]
             training_sv = sub_X[3]
             target = sub_Y[0]
@@ -231,7 +220,7 @@ def main(args):
         val_epoch_accuracy.reset_states()
 
     # Save the model after training
-    save_path = 'models/1/'
+    save_path = 'models/2/'
     pathlib.Path(save_path).mkdir(parents=True, exist_ok=True)  
     tf.saved_model.save(gnn, save_path)
 

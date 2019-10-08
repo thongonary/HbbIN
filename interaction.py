@@ -8,9 +8,9 @@ import tensorflow as tf
 from tensorflow.keras import layers, models
 import numpy as np
 
-class InteractionLayer(layers.Layer):
+class InteractionModel(models.Model):
     def __init__(self, n_constituents, n_targets, params, hidden, n_vertices, params_v, vv_branch=False, De=5, Do=6):
-        super(InteractionLayer, self).__init__()
+        super(InteractionModel, self).__init__()
         self.hidden = int(hidden)
         self.P = params
         self.N = n_constituents
@@ -57,6 +57,8 @@ class InteractionLayer(layers.Layer):
             self.fc_fixed = layers.Dense(self.n_targets, input_shape=(2*self.Do,))
         else:
             self.fc_fixed = layers.Dense(self.n_targets, input_shape=(self.Do,))
+        
+        self.mlp = layers.Dense(n_targets)
 
     def assign_matrices(self):
         Rr = np.zeros([self.N, self.Nr], dtype=np.float32)
@@ -90,13 +92,7 @@ class InteractionLayer(layers.Layer):
         self.Rl = tf.convert_to_tensor(Rl)
         self.Ru = tf.convert_to_tensor(Ru) 
 
-    def __call__(self, *args, **kwargs):
-        """
-        Shorthand for :py:meth:`build`.
-        """
-        return self.build(*args, **kwargs)
-
-    def build(self, x, y, **kwargs):
+    def call(self, x, y, **kwargs):
         ###PF Candidate - PF Candidate###
         Orr = self.tmul(x, self.Rr)
         Ors = self.tmul(x, self.Rs)
@@ -171,10 +167,9 @@ class InteractionLayer(layers.Layer):
             N_v = tf.reduce_sum(O_v, 1)
             del O_v
             return N, Nv 
+        
+        return self.mlp(N)
 
-        return N 
-
-    @tf.function
     def tmul(self, x, y):  #Takes (I * J * K)(K * L) -> I * J * L 
         x_shape = tf.shape(x)
         y_shape = tf.shape(y)
