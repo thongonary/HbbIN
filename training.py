@@ -19,9 +19,9 @@ from tensorflow.keras import layers, models
 from interaction import InteractionModel
 
 os.environ['HDF5_USE_FILE_LOCKING'] = 'FALSE'
-if os.path.isdir('/bigdata/shared/BumbleB'):
-    test_path = '/bigdata/shared/BumbleB/convert_20181121_ak8_80x_deepDoubleB_db_pf_cpf_sv_dl4jets_test/'
-    train_path = '/bigdata/shared/BumbleB/convert_20181121_ak8_80x_deepDoubleB_db_pf_cpf_sv_dl4jets_train_val/'
+if os.path.isdir('/storage/group/gpu/bigdata/BumbleB'):
+    test_path = 'storage/group/gpu/bigdata/BumbleB/convert_20181121_ak8_80x_deepDoubleB_db_pf_cpf_sv_dl4jets_test/'
+    train_path = '/storage/group/gpu/bigdata/BumbleB/convert_20181121_ak8_80x_deepDoubleB_db_pf_cpf_sv_dl4jets_train_val/'
 elif os.path.isdir('/eos/user/w/woodson/IN'):
     test_path = '/eos/user/w/woodson/IN/convert_20181121_ak8_80x_deepDoubleB_db_pf_cpf_sv_dl4jets_test/'
     train_path = '/eos/user/w/woodson/IN/convert_20181121_ak8_80x_deepDoubleB_db_pf_cpf_sv_dl4jets_train_val/'
@@ -87,8 +87,8 @@ def main(args):
     
     from data import H5Data
     files = glob.glob(train_path + "/newdata_*.h5")
-    files_val = files[:5] # take first 5 for validation
-    files_train = files[5:] # take rest for training
+    files_val = files[4:5] # take first 5 for validation
+    files_train = files[5:6] # take rest for training
     
     label = 'new'
     outdir = args.outdir
@@ -121,10 +121,11 @@ def main(args):
     net_kwargs = {"vv_branch": int(vv_branch), "De": args.De, "Do": args.Do}
     
     gnn = InteractionModel(*net_args, **net_kwargs)
-    
+    gnn.compile(optimizer='adam')
+    print("Model compiled")
     #### Start training ####
     
-    n_epochs = 5
+    n_epochs = 1
     # Keep results for plotting
     train_loss_results = []
     train_accuracy_results = []
@@ -150,7 +151,7 @@ def main(args):
         val_epoch_accuracy = tf.keras.metrics.CategoricalAccuracy('test_accuracy')
 
         # Training
-        for sub_X,sub_Y,sub_Z in tqdm.tqdm(data_train.generate_data(),total= 5): # n_train/batch_size):
+        for sub_X,sub_Y,sub_Z in tqdm.tqdm(data_train.generate_data(),total = n_train/batch_size):
             training = sub_X[2]
             training_sv = sub_X[3]
             target = sub_Y[0]
@@ -158,7 +159,7 @@ def main(args):
             # Define loss function
             cce = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
             def loss(model, x1, x2, y):
-                y_ = model(x1, x2)
+                y_ = model([x1, x2])
                 return cce(y_true=y, y_pred=y_)
             def grad(model, input_par, input_sv, targets):
                 with tf.GradientTape() as tape:
@@ -177,10 +178,10 @@ def main(args):
             # Track progress
             epoch_loss_avg(loss_value)  # Add current batch loss
             # Compare predicted label to actual label
-            epoch_accuracy(target, tf.nn.softmax(gnn(training, training_sv)))
+            epoch_accuracy(target, tf.nn.softmax(gnn([training, training_sv])))
 
         # Validation
-        for sub_X,sub_Y,sub_Z in tqdm.tqdm(data_val.generate_data(),total= 2): #n_val/batch_size):
+        for sub_X,sub_Y,sub_Z in tqdm.tqdm(data_val.generate_data(),total = n_val/batch_size):
             training = sub_X[2]
             training_sv = sub_X[3]
             target = sub_Y[0]
@@ -190,7 +191,7 @@ def main(args):
             
             # Track progress
             val_epoch_loss_avg(loss_value)
-            val_epoch_accuracy(target, tf.nn.softmax(gnn(training, training_sv)))
+            val_epoch_accuracy(target, tf.nn.softmax(gnn([training, training_sv])))
 
         # End epoch
         train_loss_results.append(epoch_loss_avg.result())

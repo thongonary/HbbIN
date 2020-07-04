@@ -92,7 +92,10 @@ class InteractionModel(models.Model):
         self.Rl = tf.convert_to_tensor(Rl)
         self.Ru = tf.convert_to_tensor(Ru) 
 
-    def call(self, x, y, **kwargs):
+    def call(self, inputs, **kwargs):
+        x = inputs[0]
+        y = inputs[1]
+
         ###PF Candidate - PF Candidate###
         Orr = self.tmul(x, self.Rr)
         Ors = self.tmul(x, self.Rs)

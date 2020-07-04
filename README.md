@@ -12,7 +12,7 @@ Requirements
 python 3.6
 h5py 2.9.0
 numpy 1.16.4
-tensorflow-gpu 2.0.0
+tensorflow-gpu 2.3.0-dev20200519 (this is the version I use)
 ```
 
 Optional:
